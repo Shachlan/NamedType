@@ -46,7 +46,7 @@ TEST_CASE("Basic usage")
 
 using NameRef = fluent::NamedType<std::string&, struct NameRefParameter>;
 
-void changeValue(NameRef name)
+void changeValue(const NameRef name)
 {
     name.get() = "value2";
 }
@@ -82,14 +82,6 @@ TEST_CASE("Implicit conversion of NamedType to NamedType::ref")
     REQUIRE(j.get() == 43);
 }
 
-TEST_CASE("Default construction")
-{
-    using StrongInt = fluent::NamedType<int, struct StrongIntTag>;
-    StrongInt strongInt;
-    strongInt.get() = 42;
-    REQUIRE(strongInt.get() == 42);
-}
-
 template<typename Function>
 using Comparator = fluent::NamedType<Function, struct ComparatorParameter>;
 
@@ -110,22 +102,6 @@ TEST_CASE("Addable")
     AddableType s1(12);
     AddableType s2(10);
     REQUIRE((s1 + s2).get() == 22);
-    REQUIRE((+s1).get() == 12);
-}
-
-TEST_CASE("BinaryAddable")
-{
-    using BinaryAddableType = fluent::NamedType<int, struct BinaryAddableTag, fluent::BinaryAddable>;
-    BinaryAddableType s1(12);
-    BinaryAddableType s2(10);
-    REQUIRE((s1 + s2).get() == 22);
-}
-
-TEST_CASE("UnaryAddable")
-{
-    using UnaryAddableType = fluent::NamedType<int, struct UnaryAddableTag, fluent::UnaryAddable>;
-    UnaryAddableType s1(12);
-    REQUIRE((+s1).get() == 12);
 }
 
 TEST_CASE("Subtractable")
@@ -134,22 +110,8 @@ TEST_CASE("Subtractable")
     SubtractableType s1(12);
     SubtractableType s2(10);
     REQUIRE((s1 - s2).get() == 2);
-    REQUIRE((-s1).get() == -12);
-}
-
-TEST_CASE("BinarySubtractable")
-{
-    using BinarySubtractableType = fluent::NamedType<int, struct BinarySubtractableTag, fluent::BinarySubtractable>;
-    BinarySubtractableType s1(12);
-    BinarySubtractableType s2(10);
-    REQUIRE((s1 - s2).get() == 2);
-}
-
-TEST_CASE("UnarySubtractable")
-{
-    using UnarySubtractableType = fluent::NamedType<int, struct UnarySubtractableTag, fluent::UnarySubtractable>;
-    UnarySubtractableType s(12);
-    REQUIRE((-s).get() == -12);
+    s1 -= s1;
+    REQUIRE(s1.get() == 2);
 }
 
 TEST_CASE("Multiplicable")
@@ -158,6 +120,18 @@ TEST_CASE("Multiplicable")
     MultiplicableType s1(12);
     MultiplicableType s2(10);
     REQUIRE((s1 * s2).get() == 120);
+    s1 *= s2;
+    REQUIRE(s1.get(), 120);
+}
+
+TEST_CASE("Divisible")
+{
+    using DivisibleType = fluent::NamedType<int, struct DivisibleTag, fluent::Divisible>;
+    DivisibleType s1(120);
+    DivisibleType s2(10);
+    REQUIRE((s1 / s2).get(), 12);
+    s1 /= s2;
+    REQUIRE(s1.get(), 12);
 }
 
 TEST_CASE("Negatable")
@@ -340,20 +314,68 @@ TEST_CASE("Named arguments")
     REQUIRE(fullName == "JamesBond");
 }
 
-TEST_CASE("Named arguments with bracket constructor")
-{
-    using Numbers = fluent::NamedType<std::vector<int>, struct NumbersTag>;
-    static const Numbers::argument numbers;
-    auto getNumbers = [](Numbers const& numbers)
-    {
-        return numbers.get();
-    };
-
-    auto vec = getNumbers(numbers = {1, 2, 3});
-    REQUIRE(vec == std::vector<int>{1, 2, 3});
-}
-
 TEST_CASE("Empty base class optimization")
 {
     REQUIRE(sizeof(Meter) == sizeof(double));
+}
+
+using strong_int = fluent::NamedType<int, struct IntTag>;
+
+TEST_CASE("Default constructible")
+{
+    strong_int i1;
+    strong_int i2{};
+}
+
+TEST_CASE("constexpr")
+{
+    using strong_bool = fluent::NamedType<bool, struct BoolTag>;
+
+    static_assert(strong_bool{ true }.get());
+}
+
+struct throw_on_construction
+{
+    throw_on_construction() { throw 42; }
+
+    throw_on_construction(int) { throw "exception"; }
+};
+
+using C = fluent::NamedType<throw_on_construction, struct throwTag>;
+
+TEST_CASE("noexcept")
+{
+    CHECK(noexcept(strong_int{}));
+    CHECK(!noexcept(C{}));
+
+    CHECK(noexcept(strong_int(3)));
+    CHECK(!noexcept(C{5}));
+}
+
+TEST_CASE("Arithmetic")
+{
+    using strong_arithmetic = fluent::NamedType<int, struct ArithmeticTag, fluent::Arithmetic>;
+    strong_arithmetic a{ 1 };
+    strong_arithmetic b{ 2 };
+
+    CHECK((a + b).get() == 3);
+
+    a += b;
+    CHECK(a.get() == 3);
+
+    CHECK((a - b).get(), 1);
+
+    a -= b;
+    CHECK(a.get() == 1);
+
+    a.get() = 5;
+    CHECK((a * b).get() == 10);
+
+    a *= b;
+    CHECK(a.get() == 10);
+
+    CHECK((a / b).get() == 5);
+
+    a /= b;
+    CHECK(a.get() == 5);
 }
