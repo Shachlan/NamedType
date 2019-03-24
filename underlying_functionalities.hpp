@@ -193,6 +193,20 @@ struct Arithmetic
 {
 };
 
+template <typename T>
+struct Arithmetic : Incrementable<T>,
+                    PreIncrementable<T>,
+                    PostIncrementable<T>,
+                    Addable<T>,
+                    Subtractable<T>,
+                    Multiplicable<T>,
+                    Divisible<T>,
+                    Negatable<T>,
+                    Comparable<T>,
+                    Printable<T>,
+                    Hashable<T>
+{};
+
 } // namespace fluent
 
 namespace std
