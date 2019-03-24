@@ -110,6 +110,11 @@ struct Modulable : crtp<T, Modulable>
 };
 
 template <typename T>
+struct BitWiseInvertable : crtp<T, BitWiseInvertable>
+{
+    T operator~() const { return T(~this->underlying().get()); }
+};
+template <typename T>
 struct Negatable : crtp<T, Negatable>
 {
     constexpr T operator-() const { return T(-this->underlying().get()); }
@@ -215,6 +220,7 @@ struct Arithmetic : Incrementable<T>,
                     Multiplicable<T>,
                     Divisible<T>,
                     Modulable<T>,
+                    BitWiseInvertable<T>,
                     Negatable<T>,
                     Comparable<T>,
                     Printable<T>,
