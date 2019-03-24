@@ -197,6 +197,8 @@ template <typename T>
 struct Arithmetic : Incrementable<T>,
                     PreIncrementable<T>,
                     PostIncrementable<T>,
+                    PreDecrementable<T>,
+                    PostDecrementable<T>,
                     Addable<T>,
                     Subtractable<T>,
                     Multiplicable<T>,
