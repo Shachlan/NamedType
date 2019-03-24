@@ -149,6 +149,17 @@ struct BitWiseXorable : crtp<T, BitWiseXorable>
 };
 
 template <typename T>
+struct BitWiseLeftShiftable : crtp<T, BitWiseLeftShiftable>
+{
+    T  operator<<(T const& other) const { return T(this->underlying().get() << other.get()); }
+    T& operator<<=(T const& other)
+    {
+        this->underlying().get() <<= other.get();
+        return this->underlying();
+    }
+};
+
+template <typename T>
 struct Negatable : crtp<T, Negatable>
 {
     constexpr T operator-() const { return T(-this->underlying().get()); }
@@ -258,6 +269,7 @@ struct Arithmetic : Incrementable<T>,
                     BitWiseAndable<T>,
                     BitWiseOrable<T>,
                     BitWiseXorable<T>,
+                    BitWiseLeftShiftable<T>,
                     Negatable<T>,
                     Comparable<T>,
                     Printable<T>,
