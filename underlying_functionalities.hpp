@@ -99,6 +99,17 @@ struct Divisible : crtp<T, Divisible>
 };
 
 template <typename T>
+struct Modulable : crtp<T, Modulable>
+{
+    T  operator%(T const& other) const { return T(this->underlying().get() % other.get()); }
+    T& operator%=(T const& other)
+    {
+        this->underlying().get() %= other.get();
+        return this->underlying();
+    }
+};
+
+template <typename T>
 struct Negatable : crtp<T, Negatable>
 {
     constexpr T operator-() const { return T(-this->underlying().get()); }
@@ -203,6 +214,7 @@ struct Arithmetic : Incrementable<T>,
                     Subtractable<T>,
                     Multiplicable<T>,
                     Divisible<T>,
+                    Modulable<T>,
                     Negatable<T>,
                     Comparable<T>,
                     Printable<T>,
