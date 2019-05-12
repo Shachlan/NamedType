@@ -97,7 +97,7 @@ public:
     }
 
 private:
-    T value_;
+    T value_{};
 };
 
 template <template <typename T> class StrongType, typename T>
