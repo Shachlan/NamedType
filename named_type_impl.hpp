@@ -53,6 +53,19 @@ public:
         argument& operator=(argument &&) = delete;
     };
     
+    constexpr const T &operator*() const & {
+      return value_;
+    }
+    constexpr T &operator*() & {
+      return value_;
+    }
+    constexpr const T &&operator*() const && {
+      return std::move(value_);
+    }
+    constexpr T &&operator*() && {
+      return std::move(value_);
+    }
+
 private:
     T value_;
 };
