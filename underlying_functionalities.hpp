@@ -51,12 +51,14 @@ template <typename T>
 struct Addable : crtp<T, Addable>
 {
     constexpr T operator+(T const& other) const { return T(this->underlying().get() + other.get()); }
+    constexpr T operator+() const { return T(+this->underlying().get()); }
 };
 
 template <typename T>
 struct Subtractable : crtp<T, Subtractable>
 {
     constexpr T operator-(T const& other) const { return T(this->underlying().get() - other.get()); }
+    constexpr T operator-() const { return T(-this->underlying().get()); }
 };
     
 template <typename T>
