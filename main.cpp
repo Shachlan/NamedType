@@ -46,7 +46,7 @@ TEST_CASE("Basic usage")
 
 using NameRef = fluent::NamedType<std::string&, struct NameRefParameter>;
 
-void changeValue(NameRef name)
+void changeValue(const NameRef name)
 {
     name.get() = "value2";
 }
@@ -300,23 +300,17 @@ TEST_CASE("Named arguments")
     REQUIRE(fullName == "JamesBond");
 }
 
-TEST_CASE("Named arguments in any order")
+TEST_CASE("Named arguments with bracket constructor")
 {
-    using FirstName = fluent::NamedType<std::string, struct FirstNameTag>;
-    using LastName = fluent::NamedType<std::string, struct LastNameTag>;
-    static const FirstName::argument firstName;
-    static const LastName::argument lastName;
-
-    auto getFullName = fluent::make_named_arg_function<FirstName, LastName>([](FirstName const& firstName, LastName const& lastName)
+    using Numbers = fluent::NamedType<std::vector<int>, struct NumbersTag>;
+    static const Numbers::argument numbers;
+    auto getNumbers = [](Numbers const& numbers)
     {
-        return firstName.get() + lastName.get();
-    });
+        return numbers.get();
+    };
 
-    auto fullName = getFullName(lastName = "Bond", firstName = "James");
-    REQUIRE(fullName == "JamesBond");
-
-    auto otherFullName = getFullName(firstName = "James", lastName = "Bond");
-    REQUIRE(otherFullName == "JamesBond");
+    auto vec = getNumbers(numbers = {1, 2, 3});
+    REQUIRE(vec == std::vector<int>{1, 2, 3});
 }
 
 TEST_CASE("Empty base class optimization")
