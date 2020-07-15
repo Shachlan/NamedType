@@ -231,15 +231,6 @@ struct BitWiseRightShiftable : crtp<T, BitWiseRightShiftable>
 };
 
 template <typename T>
-struct Negatable : crtp<T, Negatable>
-{
-    constexpr T operator-() const
-    {
-        return T(-this->underlying().get());
-    }
-};
-
-template <typename T>
 struct Comparable : crtp<T, Comparable>
 {
     constexpr bool operator<(T const& other) const
@@ -359,7 +350,6 @@ struct Arithmetic
     , BitWiseXorable<T>
     , BitWiseLeftShiftable<T>
     , BitWiseRightShiftable<T>
-    , Negatable<T>
     , Comparable<T>
     , Printable<T>
     , Hashable<T>

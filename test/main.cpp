@@ -100,7 +100,15 @@ TEST_CASE("Implicit conversion of NamedType to NamedType::ref")
     REQUIRE(j.get() == 43);
 }
 
-template <typename Function>
+TEST_CASE("Default construction")
+{
+    using StrongInt = fluent::NamedType<int, struct StrongIntTag>;
+    StrongInt strongInt;
+    strongInt.get() = 42;
+    REQUIRE(strongInt.get() == 42);
+}
+
+template<typename Function>
 using Comparator = fluent::NamedType<Function, struct ComparatorParameter>;
 
 template <typename Function>
@@ -120,6 +128,22 @@ TEST_CASE("Addable")
     AddableType s1(12);
     AddableType s2(10);
     REQUIRE((s1 + s2).get() == 22);
+    REQUIRE((+s1).get() == 12);
+}
+
+TEST_CASE("BinaryAddable")
+{
+    using BinaryAddableType = fluent::NamedType<int, struct BinaryAddableTag, fluent::BinaryAddable>;
+    BinaryAddableType s1(12);
+    BinaryAddableType s2(10);
+    REQUIRE((s1 + s2).get() == 22);
+}
+
+TEST_CASE("UnaryAddable")
+{
+    using UnaryAddableType = fluent::NamedType<int, struct UnaryAddableTag, fluent::UnaryAddable>;
+    UnaryAddableType s1(12);
+    REQUIRE((+s1).get() == 12);
 }
 
 TEST_CASE("Subtractable")
@@ -128,8 +152,22 @@ TEST_CASE("Subtractable")
     SubtractableType s1(12);
     SubtractableType s2(10);
     REQUIRE((s1 - s2).get() == 2);
-    s1 -= s2;
-    REQUIRE(s1.get() == 2);
+    REQUIRE((-s1).get() == -12);
+}
+
+TEST_CASE("BinarySubtractable")
+{
+    using BinarySubtractableType = fluent::NamedType<int, struct BinarySubtractableTag, fluent::BinarySubtractable>;
+    BinarySubtractableType s1(12);
+    BinarySubtractableType s2(10);
+    REQUIRE((s1 - s2).get() == 2);
+}
+
+TEST_CASE("UnarySubtractable")
+{
+    using UnarySubtractableType = fluent::NamedType<int, struct UnarySubtractableTag, fluent::UnarySubtractable>;
+    UnarySubtractableType s(12);
+    REQUIRE((-s).get() == -12);
 }
 
 TEST_CASE("Multiplicable")
@@ -150,13 +188,6 @@ TEST_CASE("Divisible")
     REQUIRE((s1 / s2).get() == 12);
     s1 /= s2;
     REQUIRE(s1.get() == 12);
-}
-
-TEST_CASE("Negatable")
-{
-    using NegatableType = fluent::NamedType<int, struct NegatableTag, fluent::Negatable>;
-    NegatableType value(10);
-    REQUIRE(value.negate().get() == -10);
 }
 
 TEST_CASE("Modulable")
@@ -437,18 +468,44 @@ TEST_CASE("Named arguments")
     REQUIRE(fullName == "JamesBond");
 }
 
+TEST_CASE("Named arguments in any order")
+{
+    using FirstName = fluent::NamedType<std::string, struct FirstNameTag>;
+    using LastName = fluent::NamedType<std::string, struct LastNameTag>;
+    static const FirstName::argument firstName;
+    static const LastName::argument lastName;
+
+    auto getFullName = fluent::make_named_arg_function<FirstName, LastName>([](FirstName const& firstName, LastName const& lastName)
+    {
+        return firstName.get() + lastName.get();
+    });
+
+    auto fullName = getFullName(lastName = "Bond", firstName = "James");
+    REQUIRE(fullName == "JamesBond");
+
+    auto otherFullName = getFullName(firstName = "James", lastName = "Bond");
+    REQUIRE(otherFullName == "JamesBond");
+}
+
+TEST_CASE("Named arguments with bracket constructor")
+{
+    using Numbers = fluent::NamedType<std::vector<int>, struct NumbersTag>;
+    static const Numbers::argument numbers;
+    auto getNumbers = [](Numbers const& numbers)
+    {
+        return numbers.get();
+    };
+
+    auto vec = getNumbers(numbers = {1, 2, 3});
+    REQUIRE(vec == std::vector<int>{1, 2, 3});
+}
+
 TEST_CASE("Empty base class optimization")
 {
     REQUIRE(sizeof(Meter) == sizeof(double));
 }
 
 using strong_int = fluent::NamedType<int, struct IntTag>;
-
-TEST_CASE("Default constructible")
-{
-    strong_int i1;
-    strong_int i2{};
-}
 
 TEST_CASE("constexpr")
 {
