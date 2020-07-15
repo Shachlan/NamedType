@@ -22,6 +22,13 @@ struct Incrementable : crtp<T, Incrementable>
 };
 
 template <typename T>
+struct Decrementable : crtp<T, Decrementable>
+{
+ T& operator-=(T const& other) { this->underlying().get() -= other.get(); return this->underlying(); }
+};
+
+
+template <typename T>
 struct PreIncrementable : crtp<T, PreIncrementable>
 {
     IGNORE_SHOULD_RETURN_REFERENCE_TO_THIS_BEGIN
@@ -76,27 +83,36 @@ struct PostDecrementable : crtp<T, PostDecrementable>
 };
 
 template <typename T>
+struct BinaryAddable : crtp<T, BinaryAddable>
 {
-    constexpr T operator+(T const& other) const
+   constexpr T operator+(T const& other) const { return T(this->underlying().get() + other.get()); }
+    constexpr T& operator+=(T const& other)
     {
-        return T(this->underlying().get() + other.get());
+        this->underlying().get() += other.get();
+        return this->underlying();
     }
 };
 
 template <typename T>
 struct UnaryAddable : crtp<T, UnaryAddable>
 {
-    constexpr T operator-(T const& other) const
-    {
-        return T(this->underlying().get() - other.get());
-    }
+   constexpr T operator+() const { return T(+this->underlying().get()); }
     constexpr T& operator-=(T const& other)
+};
+
+template <typename T>
+struct Addable : BinaryAddable<T>, UnaryAddable<T> {};
+
+template <typename T>
+struct BinarySubtractable : crtp<T, BinarySubtractable>
+{
+   T operator-(T const& other) const { return T(this->underlying().get() - other.get()); }
     {
         this->underlying().get() -= other.get();
         return this->underlying();
     }
 };
-
+   
 template <typename T>
 struct Addable : BinaryAddable<T>, UnaryAddable<T> {};
 
@@ -109,11 +125,12 @@ struct BinarySubtractable : crtp<T, BinarySubtractable>
 template <typename T>
 struct UnarySubtractable : crtp<T, UnarySubtractable>
 {
-    constexpr T operator-() const { return T(-this->underlying().get()); }
+   constexpr T operator-() const { return T(-this->underlying().get()); }
 };
+   
 template <typename T>
 struct Subtractable : BinarySubtractable<T>, UnarySubtractable<T> {};
-    
+   
 template <typename T>
 struct Multiplicable : crtp<T, Multiplicable>
 {

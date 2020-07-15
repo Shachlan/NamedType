@@ -49,12 +49,12 @@ public:
     }
 
     // get
-    [[nodiscard]] constexpr T& get() noexcept
+    constexpr T& get() noexcept
     {
         return value_;
     }
 
-    [[nodiscard]] constexpr T const& get() const noexcept
+    constexpr std::remove_reference_t<T> const& get() const noexcept
     {
         return value_;
     }
@@ -68,11 +68,10 @@ public:
 
     struct argument
     {
-        NamedType operator=(T&& value) const
-        {
-            return NamedType(std::forward<T>(value));
-        }
-
+       NamedType operator=(T&& value) const
+       {
+           return NamedType(std::forward<T>(value));
+       }
         template <typename U>
         NamedType operator=(U&& value) const
         {
@@ -103,7 +102,7 @@ public:
     }
 
 private:
-    T value_{};
+    T value_;
 };
 
 template <template <typename T> class StrongType, typename T>
@@ -115,14 +114,14 @@ constexpr StrongType<T> make_named(T const& value)
 namespace details {
 template <class F, class... Ts>
 struct AnyOrderCallable{
-    F f;
-    template <class... Us>
-    auto operator()(Us&&...args) const
-    {
-        static_assert(sizeof...(Ts) == sizeof...(Us), "Passing wrong number of arguments");
-        auto x = std::make_tuple(std::forward<Us>(args)...);
-        return f(std::move(std::get<Ts>(x))...);
-    }
+   F f;
+   template <class... Us>
+   auto operator()(Us&&...args) const
+   {
+       static_assert(sizeof...(Ts) == sizeof...(Us), "Passing wrong number of arguments");
+       auto x = std::make_tuple(std::forward<Us>(args)...);
+       return f(std::move(std::get<Ts>(x))...);
+   }
 };
 } //namespace details
 
@@ -130,9 +129,8 @@ struct AnyOrderCallable{
 template <class... Args, class F>
 auto make_named_arg_function(F&& f)
 {
-    return details::AnyOrderCallable<F, Args...>{std::forward<F>(f)};
+   return details::AnyOrderCallable<F, Args...>{std::forward<F>(f)};
 }
-    
 } // namespace fluent
 
 #endif /* named_type_impl_h */
