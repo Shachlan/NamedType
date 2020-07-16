@@ -68,7 +68,10 @@ struct PostDecrementable : crtp<T, PostDecrementable>
 template <typename T>
 struct BinaryAddable : crtp<T, BinaryAddable>
 {
-   constexpr T operator+(T const& other) const { return T(this->underlying().get() + other.get()); }
+    constexpr T operator+(T const& other) const
+    {
+        return T(this->underlying().get() + other.get());
+    }
     constexpr T& operator+=(T const& other)
     {
         this->underlying().get() += other.get();
@@ -79,47 +82,60 @@ struct BinaryAddable : crtp<T, BinaryAddable>
 template <typename T>
 struct UnaryAddable : crtp<T, UnaryAddable>
 {
-   constexpr T operator+() const { return T(+this->underlying().get()); }
-    constexpr T& operator-=(T const& other)
+    constexpr T operator+() const
+    {
+        return T(+this->underlying().get());
+    }
 };
 
 template <typename T>
-struct Addable : BinaryAddable<T>, UnaryAddable<T> {};
+struct Addable
+    : BinaryAddable<T>
+    , UnaryAddable<T>
+{
+};
 
 template <typename T>
 struct BinarySubtractable : crtp<T, BinarySubtractable>
 {
-   T operator-(T const& other) const { return T(this->underlying().get() - other.get()); }
+    constexpr T operator-(T const& other) const
+    {
+        return T(this->underlying().get() - other.get());
+    }
+    constexpr T& operator-=(T const& other)
     {
         this->underlying().get() -= other.get();
         return this->underlying();
     }
 };
-   
-template <typename T>
-struct Addable : BinaryAddable<T>, UnaryAddable<T> {};
 
-template <typename T>
-struct BinarySubtractable : crtp<T, BinarySubtractable>
-{
-    constexpr T operator-(T const& other) const { return T(this->underlying().get() - other.get()); }
-};
-    
 template <typename T>
 struct UnarySubtractable : crtp<T, UnarySubtractable>
 {
-   constexpr T operator-() const { return T(-this->underlying().get()); }
+    constexpr T operator-() const
+    {
+        return T(-this->underlying().get());
+    }
 };
-   
+
 template <typename T>
-struct Subtractable : BinarySubtractable<T>, UnarySubtractable<T> {};
-   
+struct Subtractable
+    : BinarySubtractable<T>
+    , UnarySubtractable<T>
+{
+};
+
 template <typename T>
 struct Multiplicable : crtp<T, Multiplicable>
 {
     constexpr T operator*(T const& other) const
     {
         return T(this->underlying().get() * other.get());
+    }
+    constexpr T& operator*=(T const& other)
+    {
+        this->underlying().get() *= other.get();
+        return this->underlying();
     }
 };
 
@@ -130,7 +146,7 @@ struct Divisible : crtp<T, Divisible>
     {
         return T(this->underlying().get() / other.get());
     }
-    T& operator/=(T const& other)
+    constexpr T& operator/=(T const& other)
     {
         this->underlying().get() /= other.get();
         return this->underlying();
@@ -140,11 +156,11 @@ struct Divisible : crtp<T, Divisible>
 template <typename T>
 struct Modulable : crtp<T, Modulable>
 {
-    T operator%(T const& other) const
+    constexpr T operator%(T const& other) const
     {
         return T(this->underlying().get() % other.get());
     }
-    T& operator%=(T const& other)
+    constexpr T& operator%=(T const& other)
     {
         this->underlying().get() %= other.get();
         return this->underlying();
@@ -154,7 +170,7 @@ struct Modulable : crtp<T, Modulable>
 template <typename T>
 struct BitWiseInvertable : crtp<T, BitWiseInvertable>
 {
-    T operator~() const
+    constexpr T operator~() const
     {
         return T(~this->underlying().get());
     }
@@ -163,11 +179,11 @@ struct BitWiseInvertable : crtp<T, BitWiseInvertable>
 template <typename T>
 struct BitWiseAndable : crtp<T, BitWiseAndable>
 {
-    T operator&(T const& other) const
+    constexpr T operator&(T const& other) const
     {
         return T(this->underlying().get() & other.get());
     }
-    T& operator&=(T const& other)
+    constexpr T& operator&=(T const& other)
     {
         this->underlying().get() &= other.get();
         return this->underlying();
@@ -177,11 +193,11 @@ struct BitWiseAndable : crtp<T, BitWiseAndable>
 template <typename T>
 struct BitWiseOrable : crtp<T, BitWiseOrable>
 {
-    T operator|(T const& other) const
+    constexpr T operator|(T const& other) const
     {
         return T(this->underlying().get() | other.get());
     }
-    T& operator|=(T const& other)
+    constexpr T& operator|=(T const& other)
     {
         this->underlying().get() |= other.get();
         return this->underlying();
@@ -191,11 +207,11 @@ struct BitWiseOrable : crtp<T, BitWiseOrable>
 template <typename T>
 struct BitWiseXorable : crtp<T, BitWiseXorable>
 {
-    T operator^(T const& other) const
+    constexpr T operator^(T const& other) const
     {
         return T(this->underlying().get() ^ other.get());
     }
-    T& operator^=(T const& other)
+    constexpr T& operator^=(T const& other)
     {
         this->underlying().get() ^= other.get();
         return this->underlying();
@@ -205,11 +221,11 @@ struct BitWiseXorable : crtp<T, BitWiseXorable>
 template <typename T>
 struct BitWiseLeftShiftable : crtp<T, BitWiseLeftShiftable>
 {
-    T operator<<(T const& other) const
+    constexpr T operator<<(T const& other) const
     {
         return T(this->underlying().get() << other.get());
     }
-    T& operator<<=(T const& other)
+    constexpr T& operator<<=(T const& other)
     {
         this->underlying().get() <<= other.get();
         return this->underlying();
@@ -219,11 +235,11 @@ struct BitWiseLeftShiftable : crtp<T, BitWiseLeftShiftable>
 template <typename T>
 struct BitWiseRightShiftable : crtp<T, BitWiseRightShiftable>
 {
-    T operator>>(T const& other) const
+    constexpr T operator>>(T const& other) const
     {
         return T(this->underlying().get() >> other.get());
     }
-    T& operator>>=(T const& other)
+    constexpr T& operator>>=(T const& other)
     {
         this->underlying().get() >>= other.get();
         return this->underlying();
@@ -249,7 +265,7 @@ struct Comparable : crtp<T, Comparable>
     {
         return !(*this < other);
     }
-    constexpr friend bool operator==(Comparable<T> const& self, T const& other)
+    friend constexpr bool operator==(Comparable<T> const& self, T const& other)
     {
         return !(self < other) && !(other.get() < self.underlying().get());
     }
