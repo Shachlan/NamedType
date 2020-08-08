@@ -16,6 +16,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 // Usage examples
 
@@ -475,9 +476,9 @@ TEST_CASE("Named arguments in any order")
     static const FirstName::argument firstName;
     static const LastName::argument lastName;
 
-    auto getFullName = fluent::make_named_arg_function<FirstName, LastName>([](FirstName const& firstName, LastName const& lastName)
+    auto getFullName = fluent::make_named_arg_function<FirstName, LastName>([](FirstName const& firstName_, LastName const& lastName_)
     {
-        return firstName.get() + lastName.get();
+        return firstName_.get() + lastName_.get();
     });
 
     auto fullName = getFullName(lastName = "Bond", firstName = "James");
@@ -491,9 +492,9 @@ TEST_CASE("Named arguments with bracket constructor")
 {
     using Numbers = fluent::NamedType<std::vector<int>, struct NumbersTag>;
     static const Numbers::argument numbers;
-    auto getNumbers = [](Numbers const& numbers)
+    auto getNumbers = [](Numbers const& numbers_)
     {
-        return numbers.get();
+        return numbers_.get();
     };
 
     auto vec = getNumbers(numbers = {1, 2, 3});
